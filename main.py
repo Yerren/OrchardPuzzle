@@ -129,12 +129,14 @@ def check_combs_iterative_brute_force(configs_in: Collection[np.ndarray]) -> tup
     :return: A tuple containing the solution configurations, or None, if no solution is found.
     """
     print(f"{len(configs_in) ** 4} combinations to check")
+    global num_operations
 
     for choice_1 in configs_in:
         for choice_2 in configs_in:
             for choice_3 in configs_in:
                 for choice_4 in configs_in:
                     output = house_config + choice_1 + choice_2 + choice_3 + choice_4
+                    num_operations += 1
                     if output.sum() == 44:
                         return tuple([choice_1, choice_2, choice_3, choice_4])
 
@@ -142,7 +144,7 @@ def check_combs_iterative_brute_force(configs_in: Collection[np.ndarray]) -> tup
 
 
 def check_combs_recursive_brute_force(configs_in: Collection[np.ndarray], current_config: np.ndarray,
-                                      num_configs: int = 0, selected_configs: tuple = ()) -> tuple | None:
+                                      num_configs: int = 0, selected_configs: tuple = (), memoize: bool = False) -> tuple | None:
     """
     Recursively checks all possible configurations using brute force. Inefficient, but simple.
 
@@ -152,6 +154,17 @@ def check_combs_recursive_brute_force(configs_in: Collection[np.ndarray], curren
     :param selected_configs: A tuple of the configurations selected so far.
     :return: A tuple containing the solution configurations, or None, if no solution is found.
     """
+    global visited_nodes
+    global num_operations
+
+    num_operations += 1
+    # If we have seen the current configuration before, we don't need to check again
+    if memoize:
+        if np.array2string(current_config) in visited_nodes:
+            return None
+        else:
+            visited_nodes.add(np.array2string(current_config))
+            visited_nodes.add(np.array2string(np.fliplr(current_config)))
 
     # Don't go deeper in the search if this configuration already is invalid
     if current_config.sum() != 4 + 10 * num_configs:
@@ -163,7 +176,7 @@ def check_combs_recursive_brute_force(configs_in: Collection[np.ndarray], curren
 
     for config in configs_in:
         result = check_combs_recursive_brute_force(configs_in, current_config + config, num_configs + 1,
-                                                   selected_configs + tuple([config]))
+                                                   selected_configs + tuple([config]), memoize=memoize)
         if result is not None:
             return result
 
@@ -195,15 +208,20 @@ if __name__ == "__main__":
     final_configs = apply_all_transformations(configs)
     print(f"{len(final_configs)} possible configurations (including transformations).")
 
+    visited_nodes = set()
+    num_operations = 0
+
     # Fully naive brute force search
     start_time = time.time()
+
     # solution_configs = check_combs_iterative_brute_force(final_configs)
-    solution_configs = check_combs_recursive_brute_force(final_configs, house_config)
+    solution_configs = check_combs_recursive_brute_force(final_configs, house_config, memoize=True)
+
     finish_time = time.time()
 
     elapsed_time = finish_time - start_time
     if solution_configs is not None:
-        print(f"Found a solution in {elapsed_time} seconds.")
+        print(f"Found a solution in {elapsed_time} seconds, and {num_operations} 'operations'.")
         plot_solution(solution_configs)
     else:
-        print(f"No solution found. Took {elapsed_time} seconds.")
+        print(f"No solution found. Took {elapsed_time} seconds, and {num_operations} 'operations'.")
