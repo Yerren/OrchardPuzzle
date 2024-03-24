@@ -121,20 +121,47 @@ def plot_solution(configs_in: Iterable[np.ndarray]) -> None:
     plt.show()
 
 
-def check_combs_iterative_brute_force(configs_in: Collection[np.ndarray]) -> tuple | None:
+def check_and_add_to_memoization(config_in: np.ndarray) -> bool:
+    """
+    Checks whether config_in has already been seen (based on whether it is in visited_nodes). If so, it returns True.
+    Otherwise, it adds config_in (and it's left-right mirror) to visited_nodes, and returns True.
+    :param config_in: The configuration to check whether it has already been seen.
+    :return: Whether the configuration has already been seen.
+    """
+    global visited_nodes
+
+    if np.array2string(config_in) in visited_nodes:
+        return True
+    else:
+        visited_nodes.add(np.array2string(config_in))
+        visited_nodes.add(np.array2string(np.fliplr(config_in)))
+        return False
+
+
+def check_combs_iterative_brute_force(configs_in: Collection[np.ndarray], memoize: bool = False) -> tuple | None:
     """
     Iteratively checks all possible configurations using brute force. Very inefficient, but simple.
 
     :param configs_in: All valid configurations to check (including transformations).
     :return: A tuple containing the solution configurations, or None, if no solution is found.
     """
-    print(f"{len(configs_in) ** 4} combinations to check")
     global num_operations
+    global visited_nodes
+
+    print(f"{len(configs_in) ** 4} combinations to check")
 
     for choice_1 in configs_in:
+        if memoize and check_and_add_to_memoization(choice_1):
+            continue
         for choice_2 in configs_in:
+            if memoize and check_and_add_to_memoization(choice_1+choice_2):
+                continue
             for choice_3 in configs_in:
+                if memoize and check_and_add_to_memoization(choice_1 + choice_2 + choice_3):
+                    continue
                 for choice_4 in configs_in:
+                    if memoize and check_and_add_to_memoization(choice_1 + choice_2 + choice_3 + choice_4):
+                        continue
                     output = house_config + choice_1 + choice_2 + choice_3 + choice_4
                     num_operations += 1
                     if output.sum() == 44:
@@ -154,18 +181,12 @@ def check_combs_recursive_brute_force(configs_in: Collection[np.ndarray], curren
     :param selected_configs: A tuple of the configurations selected so far.
     :return: A tuple containing the solution configurations, or None, if no solution is found.
     """
-    global visited_nodes
     global num_operations
 
     num_operations += 1
     # If we have seen the current configuration before, we don't need to check again
-    if memoize:
-        if np.array2string(current_config) in visited_nodes:
-            return None
-        else:
-            visited_nodes.add(np.array2string(current_config))
-            visited_nodes.add(np.array2string(np.fliplr(current_config)))
-
+    if memoize and check_and_add_to_memoization(current_config):
+        return None
     # Don't go deeper in the search if this configuration already is invalid
     if current_config.sum() != 4 + 10 * num_configs:
         return None
@@ -214,7 +235,7 @@ if __name__ == "__main__":
     # Fully naive brute force search
     start_time = time.time()
 
-    # solution_configs = check_combs_iterative_brute_force(final_configs)
+    # solution_configs = check_combs_iterative_brute_force(final_configs, memoize=True)
     solution_configs = check_combs_recursive_brute_force(final_configs, house_config, memoize=True)
 
     finish_time = time.time()
