@@ -17,6 +17,7 @@ _This repo contains spoilers for the Dr Wood Orchard puzzle. Continue at the ris
    * There are eight possible gradients of line that can fit on the 8x8 grid.
      * We can now go through and check all selections of five lines can form a valid configuration.
    * **For a more detailed explanation, read the excellent [solution document](https://docs.google.com/document/d/1DaRbQx-8kFIkgmmHDGZjvzpMoFwI1Id2qWXb3GmXIh0/edit#heading=h.9durt8hvhzzb) by Monotof1, for their [modified version of the puzzle](https://www.reddit.com/r/puzzles/comments/6xd9o4/the_orchard_challenge/) (which is arguably a more interesting version[^2]**
+2. TODO
 
 [^1]: Solving this algorithmically would be an interesting future extension.
 [^2]: The removal of the "house" makes for a cleaner premise, while enforcing the use of different configurations leads to a more interesting solution.
