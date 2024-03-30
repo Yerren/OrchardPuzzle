@@ -17,11 +17,11 @@ _This repo contains spoilers for the Dr Wood Orchard puzzle. Continue at the ris
    * There are eight possible gradients of line that can fit on the 8x8 grid.
      * We can now go through and check all selections of five lines can form a valid configuration.
      * This results in five valid configurations (excluding rotations, reflections, and translations).
-       * <img src="https://github.com/Yerren/OrchardPuzzle/blob/main/config_1.png?raw=true" height="300" /> 
-       * <img src="https://github.com/Yerren/OrchardPuzzle/blob/main/config_2.png?raw=true" height="300" /> 
-       * <img src="https://github.com/Yerren/OrchardPuzzle/blob/main/config_3.png?raw=true" height="300" /> 
-       * <img src="https://github.com/Yerren/OrchardPuzzle/blob/main/config_4.png?raw=true" height="300" /> 
-       * <img src="https://github.com/Yerren/OrchardPuzzle/blob/main/config_5.png?raw=true" height="300" /> 
+       * <img src="https://github.com/Yerren/OrchardPuzzle/blob/main/config_1.png?raw=true&nocache=5414324" height="300" /> 
+       * <img src="https://github.com/Yerren/OrchardPuzzle/blob/main/config_2.png?raw=true&nocache=5414324" height="300" /> 
+       * <img src="https://github.com/Yerren/OrchardPuzzle/blob/main/config_3.png?raw=true&nocache=5414324" height="300" /> 
+       * <img src="https://github.com/Yerren/OrchardPuzzle/blob/main/config_4.png?raw=true&nocache=5414324" height="300" /> 
+       * <img src="https://github.com/Yerren/OrchardPuzzle/blob/main/config_5.png?raw=true&nocache=5414324" height="300" /> 
    * **For a more detailed explanation, read the excellent [solution document](https://docs.google.com/document/d/1DaRbQx-8kFIkgmmHDGZjvzpMoFwI1Id2qWXb3GmXIh0/edit#heading=h.9durt8hvhzzb) by Monotof1, for their [modified version of the puzzle](https://www.reddit.com/r/puzzles/comments/6xd9o4/the_orchard_challenge/) (which is arguably more interesting[^2])**
 2. We apply transformations to the valid configurations:
   * For each new configuration, we check that they are still valid, and that they haven't already been found (as well as that their left-right mirror hasn't already been found, as that is the only symmetry, due to the "house").
