@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 from collections.abc import Iterable
 from collections.abc import Collection
+import pandas as pd
 import time
 
 
@@ -129,6 +130,9 @@ def check_and_add_to_memoization(config_in: np.ndarray) -> bool:
     :return: Whether the configuration has already been seen.
     """
     global visited_nodes
+    global num_operations
+
+    num_operations += 1
 
     if np.array2string(config_in) in visited_nodes:
         return True
@@ -138,32 +142,43 @@ def check_and_add_to_memoization(config_in: np.ndarray) -> bool:
         return False
 
 
-def check_combs_iterative_brute_force(configs_in: Collection[np.ndarray], memoize: bool = False) -> tuple | None:
+def check_combs_iterative_brute_force(configs_in: Collection[np.ndarray], memoize_depth: int = 0) -> tuple | None:
     """
     Iteratively checks all possible configurations using brute force. Very inefficient, but simple.
 
     :param configs_in: All valid configurations to check (including transformations).
+    :param memoize_depth: Up to what depth of the search tree to apply memoization to.
     :return: A tuple containing the solution configurations, or None, if no solution is found.
     """
     global num_operations
     global visited_nodes
 
-    print(f"{len(configs_in) ** 4} combinations to check")
-
     for choice_1 in configs_in:
-        if memoize and check_and_add_to_memoization(choice_1):
+        if memoize_depth > 0 and check_and_add_to_memoization(choice_1):
             continue
+        num_operations += 1
+        if (house_config + choice_1).sum() != 14:
+            continue
+
         for choice_2 in configs_in:
-            if memoize and check_and_add_to_memoization(choice_1+choice_2):
+            if memoize_depth > 1 and check_and_add_to_memoization(choice_1+choice_2):
                 continue
+            num_operations += 1
+            if (house_config + choice_1 + choice_2).sum() != 24:
+                continue
+
             for choice_3 in configs_in:
-                if memoize and check_and_add_to_memoization(choice_1 + choice_2 + choice_3):
+                if memoize_depth > 2 and check_and_add_to_memoization(choice_1 + choice_2 + choice_3):
                     continue
+                num_operations += 1
+                if (house_config + choice_1 + choice_2 + choice_3).sum() != 34:
+                    continue
+
                 for choice_4 in configs_in:
-                    if memoize and check_and_add_to_memoization(choice_1 + choice_2 + choice_3 + choice_4):
+                    if memoize_depth > 3 and check_and_add_to_memoization(choice_1 + choice_2 + choice_3 + choice_4):
                         continue
-                    output = house_config + choice_1 + choice_2 + choice_3 + choice_4
                     num_operations += 1
+                    output = house_config + choice_1 + choice_2 + choice_3 + choice_4
                     if output.sum() == 44:
                         return tuple([choice_1, choice_2, choice_3, choice_4])
 
@@ -171,7 +186,8 @@ def check_combs_iterative_brute_force(configs_in: Collection[np.ndarray], memoiz
 
 
 def check_combs_recursive_brute_force(configs_in: Collection[np.ndarray], current_config: np.ndarray,
-                                      num_configs: int = 0, selected_configs: tuple = (), memoize: bool = False) -> tuple | None:
+                                      num_configs: int = 0, selected_configs: tuple = (),
+                                      memoize_depth: int = 0) -> tuple | None:
     """
     Recursively checks all possible configurations using brute force. Inefficient, but simple.
 
@@ -179,25 +195,26 @@ def check_combs_recursive_brute_force(configs_in: Collection[np.ndarray], curren
     :param current_config: The current configuration, consisting of all the selected configs added together.
     :param num_configs: The number of configurations already selected.
     :param selected_configs: A tuple of the configurations selected so far.
+    :param memoize_depth: Up to what depth (as represented by num_configs) of the search tree to apply memoization to.
     :return: A tuple containing the solution configurations, or None, if no solution is found.
     """
     global num_operations
 
-    num_operations += 1
     # If we have seen the current configuration before, we don't need to check again
-    if memoize and check_and_add_to_memoization(current_config):
+    if memoize_depth != 0 and num_configs < memoize_depth + 1 and check_and_add_to_memoization(current_config):
         return None
+
+    num_operations += 1
     # Don't go deeper in the search if this configuration already is invalid
     if current_config.sum() != 4 + 10 * num_configs:
         return None
-
-    # If we are at the final layer of the search tree, return whether the solution is valid.
-    if num_configs == 4 and current_config.sum() == 44:
+    elif num_configs == 4:
+        # If we are at the final layer of the search tree, return whether the solution is valid.
         return selected_configs
 
     for config in configs_in:
         result = check_combs_recursive_brute_force(configs_in, current_config + config, num_configs + 1,
-                                                   selected_configs + tuple([config]), memoize=memoize)
+                                                   selected_configs + tuple([config]), memoize_depth=memoize_depth)
         if result is not None:
             return result
 
@@ -226,23 +243,49 @@ if __name__ == "__main__":
     for i, indices in enumerate(config_indices):
         configs[i][indices[:, 0], indices[:, 1]] = True
 
+    # Plot individual configs
+    # for config in configs:
+    #     plot_solution([config])
+
     final_configs = apply_all_transformations(configs)
     print(f"{len(final_configs)} possible configurations (including transformations).")
 
     visited_nodes = set()
     num_operations = 0
 
-    # Fully naive brute force search
-    start_time = time.time()
+    results_frame = pd.DataFrame(columns=["Method", "Memoize Depth", "Mean Time", "Min Time", "Max Time",
+                                          "Num Operations"])
+    num_repetitions = 5
 
-    # solution_configs = check_combs_iterative_brute_force(final_configs, memoize=True)
-    solution_configs = check_combs_recursive_brute_force(final_configs, house_config, memoize=True)
+    for search_method in ["Iterative", "Recursive"]:
+        for memoize_depth_selection in range(5):
+            timing_results = np.zeros(num_repetitions)
+            for rep_idx in range(num_repetitions):
+                visited_nodes = set()
+                num_operations = 0
 
-    finish_time = time.time()
+                start_time = time.time()
 
-    elapsed_time = finish_time - start_time
-    if solution_configs is not None:
-        print(f"Found a solution in {elapsed_time} seconds, and {num_operations} 'operations'.")
-        plot_solution(solution_configs)
-    else:
-        print(f"No solution found. Took {elapsed_time} seconds, and {num_operations} 'operations'.")
+                if search_method == "Iterative":
+                    solution_configs = check_combs_iterative_brute_force(final_configs,
+                                                                         memoize_depth=memoize_depth_selection)
+                else:
+                    solution_configs = check_combs_recursive_brute_force(final_configs, house_config,
+                                                                         memoize_depth=memoize_depth_selection)
+                finish_time = time.time()
+
+                elapsed_time = finish_time - start_time
+                timing_results[rep_idx] = elapsed_time
+
+                if solution_configs:
+                    print("solution found")
+                else:
+                    print("solution not found")
+
+            results_frame.loc[len(results_frame)] = [search_method, memoize_depth_selection, timing_results.mean(),
+                                                     timing_results.min(), timing_results.max(), num_operations]
+
+    print(results_frame.to_markdown(index=False))
+
+    # PLot final solution
+    # plot_solution(solution_configs)
