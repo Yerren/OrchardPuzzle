@@ -16,8 +16,37 @@ _This repo contains spoilers for the Dr Wood Orchard puzzle. Continue at the ris
      * Additionally, no two lines can be parallel (as then they wouldn't intersect).
    * There are eight possible gradients of line that can fit on the 8x8 grid.
      * We can now go through and check all selections of five lines can form a valid configuration.
+     * This results in five valid configurations (excluding rotations, reflections, and translations). TODO: add figures showing these five.
    * **For a more detailed explanation, read the excellent [solution document](https://docs.google.com/document/d/1DaRbQx-8kFIkgmmHDGZjvzpMoFwI1Id2qWXb3GmXIh0/edit#heading=h.9durt8hvhzzb) by Monotof1, for their [modified version of the puzzle](https://www.reddit.com/r/puzzles/comments/6xd9o4/the_orchard_challenge/) (which is arguably more interesting[^2])**
-2. TODO
+2. We apply transformations to the valid configurations:
+  * For each new configuration, we check that they are still valid, and that they haven't already been found (as well as that their left-right mirror hasn't already been found, as that is the only symmetry, due to the "house").
+  * Translation: shift the 7x7 configurations by one step right, down, and right+down.
+  * Flip: flip all configurations found so far horizontally and vertically.
+  * Rotate: rotate all configurations found so far 90, 180, and 270 degrees.
+  * This leaves us with 40 total valid configurations.
+3. We search for valid (non-overlapping) selections of four configurations:
+  * There are many ways to do this, but I experimented with two basic approaches:
+      1. Brute force iterative search:
+           * Iteratively select configurations, at each stage checking whether they are valid (no overlaps).
+           * If four configurations have been selected, without overlaps, a solution is found.
+      2. Brute force recursive search:
+           * Very similar to the iterative version, just implemented recursively.
+   * For both iterative and recursive search, I implemented some simple memoization.
+       * Before checking a selection of configurations, we check whether the current board state (or its left-right mirror) has been seen before.
+       * If it has been seen, do not continue searching deeper.
+       * If it has not been seen, add it to the hash table (set) of seen configurations.
+   * These approaches find the following valid solution: TODO: add figure.
+
+# Experiments
+Out of curiosity, I evaluated the (time) efficiency for the iterative vs recursive searches. I also evaluated the impact of memoization.
+A few key considerations:
+* The search space is relatively small and shallow, so these experiments are a bit trivial. However, it would be an interesting future avenue of exploration to create similar puzzles at larger scales (e.g., larger grid sizes, more trees, and more trees required per line).
+* To help account for some of the variability when timing, I repeat each search multiple times and take the average of their durations.
+* The operation to check whether a selection is valid is very cheap, particularly compared to the memoization operations. Therefore, it is also interesting to consider the number of "operations" that are performed.
+    * Here I (somewhat arbitrarily) consider an "operation" to be either checking whether a selection is valid, or checking if it has already been seen (and adding it to the hash table if not).
+    * Because of the relatively large cost of the memoization operation, it is also worth considering only performing them at lower levels of the search (i.e., only checking whether selections of one or two configurations have been seen before).
+        * Therefore, I also checked the performance of only performing memoization up to certain depths (one to four selected configurations) of the search.
+
 
 [^1]: Solving this algorithmically would be an interesting future extension.
 [^2]: The removal of the "house" makes for a cleaner premise, while enforcing the use of different configurations leads to a more interesting solution.
