@@ -2,34 +2,36 @@
 The [Dr Wood Orchard puzzle](https://dr-wood.fandom.com/wiki/Orchard) is a challenge in where you need to place **four varieties of trees**, each with **ten trees**, in an 8x8 grid such that each variety makes **five lines** of **four trees**. 
 There is also a 2x2 "house" in the bottom centre of the grid, where no trees can be placed.
 
-_This repo contains spoilers for the Dr Wood Orchard puzzle. Continue at the risk of spoiling the puzzle for yourself._
+_This repo contains spoilers for the Dr Wood Orchard puzzle. Continue at the risk of spoiling the fun of the puzzle for yourself._
 
 # Method
-1. We determine all possible configurations of one variety of tree such that the criteria of five lines of four trees are met. We solve this by hand[^1], using the following key observations:
-   * If every tree was used once, we would need 20 trees total (five lines of four trees). This implies each tree needs to contribute to two lines on average.
-   * A single tree cannot contribute to three (or more) lines at once.
-     * Consider three lines (of four trees) intersecting at one tree.
-     * This would require all ten trees for just those three lines.
-     * There is no way that any more lines of four trees could be formed in this configuration, as that would require at least one of the three existing lines to contribute more than one tree (which is impossible).
-   * From the two points above, we can conclude that every tree must contribute to exactly two lines.
-     * Therefore, we also know that each line must intersect with every other line.
-     * Additionally, no two lines can be parallel (as then they wouldn't intersect).
-   * There are eight possible gradients of line that can fit on the 8x8 grid.
-     * We can now go through and check all selections of five lines can form a valid configuration.
-     * This results in five valid configurations (excluding rotations, reflections, and translations).
-       * <img src="https://github.com/Yerren/OrchardPuzzle/blob/main/config_1.png?raw=true&nocache=5414324" height="300" /> 
-       * <img src="https://github.com/Yerren/OrchardPuzzle/blob/main/config_2.png?raw=true&nocache=5414324" height="300" /> 
-       * <img src="https://github.com/Yerren/OrchardPuzzle/blob/main/config_3.png?raw=true&nocache=5414324" height="300" /> 
-       * <img src="https://github.com/Yerren/OrchardPuzzle/blob/main/config_4.png?raw=true&nocache=5414324" height="300" /> 
-       * <img src="https://github.com/Yerren/OrchardPuzzle/blob/main/config_5.png?raw=true&nocache=5414324" height="300" /> 
-   * **For a more detailed explanation, read the excellent [solution document](https://docs.google.com/document/d/1DaRbQx-8kFIkgmmHDGZjvzpMoFwI1Id2qWXb3GmXIh0/edit#heading=h.9durt8hvhzzb) by Monotof1, for their [modified version of the puzzle](https://www.reddit.com/r/puzzles/comments/6xd9o4/the_orchard_challenge/) (which is arguably more interesting[^2])**
-2. We apply transformations to the valid configurations:
-  * For each new configuration, we check that they are still valid, and that they haven't already been found (as well as that their left-right mirror hasn't already been found, as that is the only symmetry, due to the "house").
+### 1. We determine all possible configurations of one variety of tree such that the criteria of five lines of four trees are met. We solve this by hand[^1], using the following key observations:
+* If every tree was used once, we would need 20 trees total (five lines of four trees). This implies each tree needs to contribute to two lines on average.
+* A single tree cannot contribute to three (or more) lines at once.
+   * Consider three lines (of four trees) intersecting at one tree.
+   * This would require all ten trees for just those three lines.
+   * There is no way that any more lines of four trees could be formed in this configuration, as that would require at least one of the three existing lines to contribute more than one tree (which is impossible).
+* From the two points above, we can conclude that every tree must contribute to exactly two lines.
+   * Therefore, we also know that each line must intersect with every other line.
+   * Additionally, no two lines can be parallel (as then they wouldn't intersect).
+* There are eight possible gradients of line that can fit on the 8x8 grid.
+   * We now go through and check all selections of five lines, and see which can form valid configurations.
+   * This results in five valid configurations (excluding rotations, reflections, and translations):
+     * <img src="https://github.com/Yerren/OrchardPuzzle/blob/main/config_1.png?raw=true&nocache=5414324" height="300" /> <img src="https://github.com/Yerren/OrchardPuzzle/blob/main/config_2.png?raw=true&nocache=5414324" height="300" /> 
+     * <img src="https://github.com/Yerren/OrchardPuzzle/blob/main/config_3.png?raw=true&nocache=5414324" height="300" /> <img src="https://github.com/Yerren/OrchardPuzzle/blob/main/config_4.png?raw=true&nocache=5414324" height="300" /> 
+     * <img src="https://github.com/Yerren/OrchardPuzzle/blob/main/config_5.png?raw=true&nocache=5414324" height="300" /> 
+* **For a more detailed explanation, read the excellent [solution document](https://docs.google.com/document/d/1DaRbQx-8kFIkgmmHDGZjvzpMoFwI1Id2qWXb3GmXIh0/edit#heading=h.9durt8hvhzzb) by Monotof1, for their [modified version of the puzzle](https://www.reddit.com/r/puzzles/comments/6xd9o4/the_orchard_challenge/) (which is arguably more interesting[^2])**
+<br>
+
+### 2. We apply transformations to the valid configurations:
+  * For each new configuration, we check that they are still valid, and that they haven't already been found (as well as that their left-right mirror hasn't already been found as, due to the "house", that is the only symmetry).
   * Translation: shift the 7x7 configurations by one step right, down, and right+down.
   * Flip: flip all configurations found so far horizontally and vertically.
   * Rotate: rotate all configurations found so far 90, 180, and 270 degrees.
   * This leaves us with 40 total valid configurations.
-3. We search for valid (non-overlapping) selections of four configurations:
+<br>
+
+### 3. We search for valid (non-overlapping) selections of four configurations:
   * There are many ways to do this, but I experimented with two basic approaches:
       1. Brute force iterative search:
            * Iteratively select configurations, at each stage checking whether they are valid (no overlaps).
@@ -46,7 +48,7 @@ _This repo contains spoilers for the Dr Wood Orchard puzzle. Continue at the ris
 # Experiments
 Out of curiosity, I evaluated the (time) efficiency for the iterative vs recursive searches. I also evaluated the impact of memoization.
 A few key considerations:
-* The search space is relatively small and shallow, so these experiments are a bit trivial. However, it would be an interesting future avenue of exploration to create similar puzzles at larger scales (e.g., larger grid sizes, more trees, and more trees required per line).
+* The search space is relatively small and shallow, so these experiments are a bit trivial. However, it would be interesting to create similar puzzles at larger scales (e.g., larger grid sizes, more trees, and more trees required per line).
 * To help account for some of the variability when timing, I repeat each search multiple times and take the average of their durations.
 * The operation to check whether a selection is valid is very cheap, particularly compared to the memoization operations. Therefore, it is also interesting to consider the number of "operations" that are performed.
     * Here I (somewhat arbitrarily) consider an "operation" to be either checking whether a selection is valid, or checking if it has already been seen (and adding it to the hash table if not).
@@ -67,9 +69,12 @@ A few key considerations:
 | Recursive |               3 |   0.465146  |  0.460429  |  0.468962  |             6575 |
 | Recursive |               4 |   0.666838  |  0.655117  |  0.681166  |             7652 |
 
-These results tell us that:
+Some observations:
+* The iterative and recursive implementations take a very similar amount of time, although the recursive approach appears to be a little faster at low memoization depths, while the iterative approach is _slightly_ faster at the higher memoization depths.
 * The number of operations is equal for the iterative and recursive approaches (aside from a negligible difference due to implementation), as expected.
-* TODO: finish write up. 
+* Adding memoization reduces the number of operations. However, the fewest operations occur when memoizing until a depth of 2, after which the number of operations starts to increase again.
+* The fastest runs are with a memoization depth of 1, even though these have the second largest number of operations.
+    * This just exemplifies the trade-off between the number of operations, and the cost of different types of operations: the memoizing operations are more expensive but, if done at early levels of the search, can cut out a lot of (cheaper) operations.
 
 [^1]: Solving this algorithmically would be an interesting future extension.
 [^2]: The removal of the "house" makes for a cleaner premise, while enforcing the use of different configurations leads to a more interesting solution.
