@@ -52,7 +52,8 @@ A few key considerations:
     * Here I (somewhat arbitrarily) consider an "operation" to be either checking whether a selection is valid, or checking if it has already been seen (and adding it to the hash table if not).
     * Because of the relatively large cost of the memoization operation, it is also worth considering only performing them at lower levels of the search (i.e., only checking whether selections of one or two configurations have been seen before).
         * Therefore, I also checked the performance of only performing memoization up to certain depths (one to four selected configurations) of the search.
-
+     
+## Results
 | Method    |   Memoize Depth |   Mean Time |   Min Time |   Max Time |   Num Operations |
 |:----------|----------------:|------------:|-----------:|-----------:|-----------------:|
 | Iterative |               0 |   0.0263247 |  0.0260231 |  0.027025  |             9444 |
@@ -65,6 +66,10 @@ A few key considerations:
 | Recursive |               2 |   0.0709893 |  0.0700641 |  0.0720677 |             6514 |
 | Recursive |               3 |   0.465146  |  0.460429  |  0.468962  |             6575 |
 | Recursive |               4 |   0.666838  |  0.655117  |  0.681166  |             7652 |
+
+These results tell us that:
+* The number of operations is equal for the iterative and recursive approaches (aside from a negligible difference due to implementation), as expected.
+* TODO: finish write up. 
 
 [^1]: Solving this algorithmically would be an interesting future extension.
 [^2]: The removal of the "house" makes for a cleaner premise, while enforcing the use of different configurations leads to a more interesting solution.
