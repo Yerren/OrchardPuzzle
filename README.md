@@ -1,3 +1,5 @@
+# !!! Harley Deacon, no cheating !!!
+
 # Overview
 The [Dr Wood Orchard puzzle](https://dr-wood.fandom.com/wiki/Orchard) is a challenge in where you need to place **four varieties of trees**, each with **ten trees**, in an 8x8 grid such that each variety makes **five lines** of **four trees**. 
 There is also a 2x2 "house" in the bottom centre of the grid, where no trees can be placed.
